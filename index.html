@@ -1,393 +1,847 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tablero de Control — Empaque y Acondicionamiento</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F8F9FA;color:#1a1a1a;min-height:100vh}
-  .db{max-width:1100px;margin:0 auto;padding:1.5rem 1.25rem 3rem}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero de Control — Informe Ejecutivo de Producción</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.10.3/Recharts.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-  /* TOP BAR */
-  .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid #E5E7EB}
-  .top-bar h1{font-size:17px;font-weight:500;color:#111}
-  .top-bar .sub{font-size:12px;color:#6B7280;margin-top:3px}
-  .badge{font-size:11px;padding:4px 12px;border-radius:8px;font-weight:500;letter-spacing:.01em}
-  .badge-ok{background:#EAF3DE;color:#27500A}
-  .badge-warn{background:#FAEEDA;color:#633806}
-  .badge-err{background:#FCEBEB;color:#791F1F}
+        :root {
+            --bg: #f4f5f7;
+            --surface: #ffffff;
+            --border: #e8eaed;
+            --border-strong: #d1d5db;
+            --text: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --accent: #1d4ed8;
+            --accent-light: #dbeafe;
+            --base: #9ca3af;
+            --projected: #1d4ed8;
+            --gain: #059669;
+            --gain-bg: #ecfdf5;
+            --shadow: 0 1px 3px rgba(0,0,0,.04), 0 1px 2px rgba(0,0,0,.02);
+            --shadow-md: 0 4px 12px rgba(0,0,0,.05);
+            --radius: 10px;
+            --radius-lg: 14px;
+        }
 
-  /* METRICS */
-  .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
-  .metric{background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:.9rem 1rem}
-  .metric .lbl{font-size:11px;color:#6B7280;margin-bottom:5px;display:flex;align-items:center;gap:5px}
-  .metric .val{font-size:26px;font-weight:500;color:#111;line-height:1}
-  .metric .delta{font-size:11px;margin-top:5px}
-  .metric .delta.up{color:#3B6D11}
-  .metric .delta.dn{color:#A32D2D}
-  .metric .delta.neu{color:#6B7280}
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
 
-  /* LAYOUT ROWS */
-  .row2{display:grid;grid-template-columns:1.55fr 1fr;gap:10px;margin-bottom:1.25rem}
-  .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.25rem}
-  .card{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:1.1rem 1.2rem}
-  .card h3{font-size:12px;font-weight:500;color:#6B7280;margin-bottom:.9rem;display:flex;align-items:center;gap:5px}
+        html, body, #root { height: 100%; width: 100%; }
 
-  /* SLIDERS */
-  .slider-row{display:flex;align-items:center;gap:10px;margin-bottom:.7rem}
-  .slider-row label{font-size:11px;color:#6B7280;width:100px;flex-shrink:0}
-  .slider-row input[type=range]{flex:1;accent-color:#378ADD;height:4px;cursor:pointer}
-  .slider-row .sval{font-size:12px;font-weight:500;min-width:32px;text-align:right;color:#111}
+        .app { min-height: 100vh; }
 
-  /* BARS */
-  .bar-section{margin-top:1rem;padding-top:.85rem;border-top:1px solid #F3F4F6}
-  .bar-section .slbl{font-size:11px;font-weight:500;color:#9CA3AF;margin-bottom:.6rem;letter-spacing:.03em;text-transform:uppercase}
-  .bar-wrap{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-  .bar-wrap .blbl{font-size:11px;color:#6B7280;width:80px;flex-shrink:0}
-  .bar-outer{flex:1;height:7px;background:#F3F4F6;border-radius:4px;overflow:hidden}
-  .bar-inner{height:100%;border-radius:4px;transition:width .5s ease}
-  .bar-wrap .bval{font-size:11px;font-weight:500;color:#111;width:32px;text-align:right}
+        /* Banner ejecutivo */
+        .exec-banner {
+            background: linear-gradient(135deg, #0f2744 0%, #1e3a5f 100%);
+            color: #fff;
+            padding: 28px 32px 32px;
+            border-bottom: 4px solid var(--accent);
+        }
 
-  /* VIABILITY PILLS */
-  .viab-row{display:flex;gap:8px;margin-top:.85rem}
-  .viab-pill{flex:1;text-align:center;padding:7px 4px;border-radius:8px;font-size:11px;font-weight:500;transition:background .3s,color .3s}
-  .viab-ok{background:#EAF3DE;color:#27500A}
-  .viab-no{background:#FCEBEB;color:#791F1F}
+        .exec-banner-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
 
-  /* SIMULATION TABLE */
-  .sim-table{width:100%;border-collapse:collapse;font-size:12px}
-  .sim-table th{font-size:10px;font-weight:500;color:#9CA3AF;text-align:right;padding:4px 5px;border-bottom:1px solid #F3F4F6;letter-spacing:.02em}
-  .sim-table th:first-child{text-align:center}
-  .sim-table td{text-align:right;padding:5px 5px;color:#111;border-bottom:1px solid #F9FAFB;font-size:12px}
-  .sim-table td:first-child{text-align:center;color:#9CA3AF}
-  .sim-table tr.total-row td{border-top:1px solid #E5E7EB;font-weight:500;border-bottom:none}
-  .ok-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#639922}
-  .err-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#E24B4A}
+        .exec-meta {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
 
-  /* RESTRICTIONS */
-  .restriccion{background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:.95rem 1rem}
-  .restriccion .rtitle{font-size:10px;font-weight:500;color:#9CA3AF;margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.04em}
-  .restriccion .rfml{font-size:13px;font-weight:500;font-family:'Courier New',monospace;color:#1F4E79;margin-bottom:.45rem;background:#EFF6FF;padding:5px 8px;border-radius:6px;display:inline-block}
-  .restriccion .rdesc{font-size:11px;color:#6B7280;line-height:1.55}
+        .date-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.25);
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: .01em;
+        }
 
-  /* CHART LEGEND */
-  .chart-legend{display:flex;gap:16px;margin-bottom:.7rem;font-size:11px;color:#6B7280}
-  .chart-legend span{display:flex;align-items:center;gap:5px}
-  .leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+        .date-badge svg { flex-shrink: 0; opacity: .9; }
 
-  /* FOOTER */
-  .footer{margin-top:1.5rem;padding-top:1rem;border-top:1px solid #E5E7EB;font-size:11px;color:#9CA3AF;display:flex;justify-content:space-between;align-items:center}
+        .report-tag {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: #93c5fd;
+        }
 
-  @media(max-width:760px){
-    .metrics{grid-template-columns:1fr 1fr}
-    .row2{grid-template-columns:1fr}
-    .row3{grid-template-columns:1fr}
-  }
-</style>
+        .exec-banner h1 {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -.03em;
+            line-height: 1.15;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .exec-lead {
+            font-size: 16px;
+            color: rgba(255,255,255,.75);
+            max-width: 560px;
+            line-height: 1.5;
+        }
+
+        .shell {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 28px 28px 48px;
+        }
+
+        /* Resumen destacado para jefe */
+        .hero-summary {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 24px;
+            background: var(--surface);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius-lg);
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .hero-summary-label {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .hero-summary-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .hero-summary-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .hero-number-block {
+            text-align: right;
+            min-width: 200px;
+        }
+
+        .hero-number {
+            font-size: 52px;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -.04em;
+            line-height: 1;
+        }
+
+        .hero-number-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gain);
+            margin-top: 6px;
+        }
+
+        /* Header controls */
+        .topbar {
+            display: flex;
+            align-items: stretch;
+            justify-content: flex-end;
+            margin-bottom: 24px;
+        }
+
+        /* Simulator panel */
+        .simulator {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px 28px;
+            min-width: 340px;
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .sim-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--text);
+            margin-bottom: 14px;
+        }
+
+        .sim-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sim-value {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--accent);
+            min-width: 72px;
+            letter-spacing: -.03em;
+        }
+
+        .slider {
+            flex: 1;
+            height: 4px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--border);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--surface);
+            box-shadow: 0 1px 4px rgba(29,78,216,.35);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--surface);
+            cursor: pointer;
+        }
+
+        .sim-hint {
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--gain);
+        }
+
+        /* KPI row */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .kpi {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 26px;
+            box-shadow: var(--shadow);
+        }
+
+        .kpi.highlight {
+            border: 2px solid var(--accent);
+            background: linear-gradient(180deg, #eff6ff 0%, #fff 100%);
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .kpi-value.accent { color: var(--accent); }
+        .kpi-value.gain { color: var(--gain); }
+
+        .kpi-delta {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gain);
+            background: var(--gain-bg);
+            padding: 5px 12px;
+            border-radius: 6px;
+        }
+
+        .kpi-sub {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Chart grid */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px 24px 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .panel.wide { grid-column: 1 / -1; }
+
+        .panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .panel-sub {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .legend-inline {
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        .chart-wrap { width: 100%; }
+
+        /* Table */
+        .table-panel { margin-bottom: 0; }
+
+        .table-wrap {
+            overflow-x: auto;
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+        thead { position: sticky; top: 0; z-index: 2; }
+
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: var(--text-muted);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 11px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        tbody tr:hover td { background: #f9fafb; }
+
+        .td-name { color: var(--text); font-weight: 500; }
+
+        .td-num {
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+
+        .td-projected { color: var(--accent); font-weight: 600; }
+        .td-gain { color: var(--gain); font-weight: 600; }
+
+        .mini-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mini-bar-track {
+            flex: 1;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+
+        .mini-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width .35s ease;
+        }
+
+        .mini-bar-pct {
+            font-size: 11px;
+            color: var(--text-muted);
+            min-width: 32px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Tooltip override feel */
+        .recharts-default-tooltip {
+            border-radius: 8px !important;
+            border: 1px solid var(--border) !important;
+            box-shadow: var(--shadow-md) !important;
+        }
+
+        @media (max-width: 1100px) {
+            .kpi-row { grid-template-columns: repeat(2, 1fr); }
+            .chart-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 900px) {
+            .hero-summary { grid-template-columns: 1fr; text-align: center; }
+            .hero-number-block { text-align: center; }
+            .exec-banner h1 { font-size: 26px; }
+        }
+
+        @media (max-width: 600px) {
+            .shell { padding: 20px 16px 32px; }
+            .exec-banner { padding: 20px 16px; }
+            .kpi-row { grid-template-columns: 1fr; }
+            .topbar { flex-direction: column; }
+            .simulator { max-width: 100%; }
+            .exec-banner h1 { font-size: 22px; }
+            .hero-number { font-size: 40px; }
+        }
+    </style>
 </head>
 <body>
-<div class="db">
-
-  <!-- TOP BAR -->
-  <div class="top-bar">
-    <div>
-      <h1><i class="ti ti-plant-2" style="font-size:16px;vertical-align:-2px;margin-right:6px;color:#378ADD"></i>Tablero de control — empaque y acondicionamiento</h1>
-      <div class="sub">Modelo de producción de nidos &nbsp;·&nbsp; Turno de 8 horas &nbsp;·&nbsp; Meta: 100 unidades/hora</div>
-    </div>
-    <span class="badge badge-ok" id="global-status">Sistema viable</span>
-  </div>
-
-  <!-- METRICS -->
-  <div class="metrics">
-    <div class="metric">
-      <div class="lbl"><i class="ti ti-box" style="font-size:13px"></i> Nidos PVC (turno)</div>
-      <div class="val" id="m-nidos">—</div>
-      <div class="delta neu" id="m-nidos-delta">proceso PVC+Nido acumulado</div>
-    </div>
-    <div class="metric">
-      <div class="lbl"><i class="ti ti-target" style="font-size:13px"></i> Meta del turno</div>
-      <div class="val">800</div>
-      <div class="delta neu">100 unid/hora × 8 h</div>
-    </div>
-    <div class="metric">
-      <div class="lbl"><i class="ti ti-refresh" style="font-size:13px"></i> Unidades a reproceso</div>
-      <div class="val" id="m-rep">—</div>
-      <div class="delta dn" id="m-rep-delta"></div>
-    </div>
-    <div class="metric">
-      <div class="lbl"><i class="ti ti-check" style="font-size:13px"></i> Producción neta</div>
-      <div class="val" id="m-neto">—</div>
-      <div class="delta up" id="m-neto-delta"></div>
-    </div>
-  </div>
-
-  <!-- ROW 2: CONTROLS + SIMULATION -->
-  <div class="row2">
-
-    <div class="card">
-      <h3><i class="ti ti-adjustments-horizontal"></i>Parámetros del turno — ajusta las tasas</h3>
-
-      <div class="slider-row">
-        <label>PVC+Nido (rₙ)</label>
-        <input type="range" id="sl-rn" min="20" max="150" step="1" value="70">
-        <span class="sval" id="vl-rn">70</span>
-      </div>
-      <div class="slider-row">
-        <label>Display (r_d)</label>
-        <input type="range" id="sl-rd" min="0" max="80" step="1" value="20">
-        <span class="sval" id="vl-rd">20</span>
-      </div>
-      <div class="slider-row">
-        <label>Bulk (r_b)</label>
-        <input type="range" id="sl-rb" min="0" max="80" step="1" value="25">
-        <span class="sval" id="vl-rb">25</span>
-      </div>
-      <div class="slider-row">
-        <label>% reproceso</label>
-        <input type="range" id="sl-rep" min="0" max="20" step="1" value="5">
-        <span class="sval" id="vl-rep">5%</span>
-      </div>
-
-      <div class="bar-section">
-        <div class="slbl">Contribución por proceso (unid/hora)</div>
-        <div class="bar-wrap">
-          <span class="blbl">PVC + Nido</span>
-          <div class="bar-outer"><div class="bar-inner" id="bar-rn" style="background:#378ADD"></div></div>
-          <span class="bval" id="bv-rn">70</span>
+    <div id="root">
+        <div style="padding:48px;text-align:center;color:#6b7280;font-family:Inter,sans-serif">
+            Cargando tablero…
         </div>
-        <div class="bar-wrap">
-          <span class="blbl">Display</span>
-          <div class="bar-outer"><div class="bar-inner" id="bar-rd" style="background:#70AD47"></div></div>
-          <span class="bval" id="bv-rd">20</span>
-        </div>
-        <div class="bar-wrap">
-          <span class="blbl">Bulk</span>
-          <div class="bar-outer"><div class="bar-inner" id="bar-rb" style="background:#EF9F27"></div></div>
-          <span class="bval" id="bv-rb">25</span>
-        </div>
-
-        <div class="viab-row">
-          <div class="viab-pill viab-ok" id="vp1">rₙ+r_d+r_b ≥ 100</div>
-          <div class="viab-pill viab-ok" id="vp2">rₙ ≥ 60</div>
-        </div>
-      </div>
     </div>
 
-    <div class="card">
-      <h3><i class="ti ti-clock"></i>Simulación hora a hora</h3>
-      <table class="sim-table">
-        <thead>
-          <tr>
-            <th>H</th>
-            <th>PVC+N</th>
-            <th>Disp</th>
-            <th>Bulk</th>
-            <th>Rep</th>
-            <th>Neto</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="sim-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- RESTRICTIONS -->
-  <div class="row3">
-    <div class="restriccion">
-      <div class="rtitle">R1 — proceso integrado</div>
-      <div class="rfml">n(t) ≤ rₙ · t</div>
-      <div class="rdesc">El nido y el PVC son un solo paso. El límite es la capacidad de ese proceso integrado.</div>
-    </div>
-    <div class="restriccion">
-      <div class="rtitle">R2 — meta total por hora</div>
-      <div class="rfml">x(t) ≥ 100 · t</div>
-      <div class="rdesc">La producción acumulada debe superar 100 unidades por cada hora transcurrida.</div>
-    </div>
-    <div class="restriccion">
-      <div class="rtitle">R3 — meta PVC+Nido</div>
-      <div class="rfml">n(t) ≥ Mₙ · t</div>
-      <div class="rdesc">Proceso principal con meta propia. Si falla, el total no se recupera con los demás.</div>
-    </div>
-    <div class="restriccion">
-      <div class="rtitle">R4 — control de reproceso</div>
-      <div class="rfml">rep(t) ≤ x(t)</div>
-      <div class="rdesc">Las unidades a reproceso nunca pueden superar lo que se produjo en ese periodo.</div>
-    </div>
-    <div class="restriccion">
-      <div class="rtitle">R5 — viabilidad del sistema</div>
-      <div class="rfml">rₙ + r_d + r_b ≥ M</div>
-      <div class="rdesc">Si la suma de tasas cae bajo la meta, el proceso no puede cumplir sin importar nada más.</div>
-    </div>
-    <div class="restriccion">
-      <div class="rtitle">R6 — no negatividad</div>
-      <div class="rfml">n, d, b, rep ≥ 0</div>
-      <div class="rdesc">No se pueden producir ni reprocesar unidades negativas. Restricción de sentido común.</div>
-    </div>
-  </div>
-
-  <!-- CHART -->
-  <div class="card" style="margin-bottom:1.25rem">
-    <h3><i class="ti ti-chart-line"></i>Producción acumulada vs meta — turno completo</h3>
-    <div class="chart-legend">
-      <span><span class="leg-sq" style="background:#378ADD"></span>Producción neta</span>
-      <span><span class="leg-sq" style="background:#E24B4A;opacity:.7"></span>Meta acumulada</span>
-    </div>
-    <div style="position:relative;height:220px">
-      <canvas id="main-chart" role="img" aria-label="Gráfica de producción acumulada vs meta por hora del turno"></canvas>
-    </div>
-  </div>
-
-  <!-- FOOTER -->
-  <div class="footer">
-    <span>Modelo: Empaque y Acondicionamiento de Flores &nbsp;·&nbsp; Restricciones R1–R6</span>
-    <span>Función objetivo: max Z = n(T) + d(T) + b(T) − rep(T)</span>
-  </div>
-
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>
-  const T=8, M=100, Mn=60;
-  let chart=null;
-
-  function getP(){
-    return {
-      rn:+document.getElementById('sl-rn').value,
-      rd:+document.getElementById('sl-rd').value,
-      rb:+document.getElementById('sl-rb').value,
-      pct:+document.getElementById('sl-rep').value/100
-    };
-  }
-
-  function update(){
-    const {rn,rd,rb,pct}=getP();
-    const rt=rn+rd+rb;
-
-    document.getElementById('vl-rn').textContent=rn;
-    document.getElementById('vl-rd').textContent=rd;
-    document.getElementById('vl-rb').textContent=rb;
-    document.getElementById('vl-rep').textContent=document.getElementById('sl-rep').value+'%';
-    document.getElementById('bv-rn').textContent=rn;
-    document.getElementById('bv-rd').textContent=rd;
-    document.getElementById('bv-rb').textContent=rb;
-    document.getElementById('bar-rn').style.width=Math.round(rn/150*100)+'%';
-    document.getElementById('bar-rd').style.width=Math.round(rd/150*100)+'%';
-    document.getElementById('bar-rb').style.width=Math.round(rb/150*100)+'%';
-
-    const v1=rt>=M, v2=rn>=Mn;
-    const vp1=document.getElementById('vp1');
-    const vp2=document.getElementById('vp2');
-    vp1.className='viab-pill '+(v1?'viab-ok':'viab-no');
-    vp1.textContent=(v1?'✓ ':'✗ ')+'rₙ+r_d+r_b '+(v1?'≥':'<')+' 100 (= '+rt+')';
-    vp2.className='viab-pill '+(v2?'viab-ok':'viab-no');
-    vp2.textContent=(v2?'✓ ':'✗ ')+'rₙ '+(v2?'≥':'<')+' 60 (= '+rn+')';
-
-    const gs=document.getElementById('global-status');
-    if(v1&&v2){gs.className='badge badge-ok';gs.textContent='Sistema viable';}
-    else if(v1||v2){gs.className='badge badge-warn';gs.textContent='Riesgo parcial';}
-    else{gs.className='badge badge-err';gs.textContent='No viable';}
-
-    const nTot=rn*T, dTot=rd*T, bTot=rb*T;
-    const repTot=Math.round(pct*(nTot+dTot+bTot));
-    const neto=nTot+dTot+bTot-repTot;
-    const meta=M*T;
-    const holgura=neto-meta;
-
-    document.getElementById('m-nidos').textContent=nTot;
-    document.getElementById('m-rep').textContent=repTot;
-    document.getElementById('m-rep-delta').textContent=document.getElementById('sl-rep').value+'% de la producción total';
-    document.getElementById('m-neto').textContent=neto;
-    const nd=document.getElementById('m-neto-delta');
-    nd.textContent=(holgura>=0?'+':'')+holgura+' sobre la meta del turno';
-    nd.className='delta '+(holgura>=0?'up':'dn');
-
-    const horas=Array.from({length:T},(_,i)=>i+1);
-    const nA=horas.map(h=>rn*h);
-    const dA=horas.map(h=>rd*h);
-    const bA=horas.map(h=>rb*h);
-    const repA=horas.map(h=>Math.round(pct*(rn+rd+rb)*h));
-    const xA=horas.map((_,i)=>nA[i]+dA[i]+bA[i]-repA[i]);
-    const metaA=horas.map(h=>M*h);
-
-    const tbody=document.getElementById('sim-body');
-    tbody.innerHTML='';
-    horas.forEach((h,i)=>{
-      const ok=xA[i]>=metaA[i];
-      const tr=document.createElement('tr');
-      tr.innerHTML=`
-        <td>${h}</td>
-        <td>${nA[i]}</td>
-        <td>${dA[i]}</td>
-        <td>${bA[i]}</td>
-        <td>${repA[i]}</td>
-        <td style="font-weight:500;color:${ok?'#3B6D11':'#A32D2D'}">${xA[i]}</td>
-        <td><span class="${ok?'ok':'err'}-dot" title="${ok?'Cumple meta':'No cumple meta'}"></span></td>`;
-      tbody.appendChild(tr);
-    });
-    const trTot=document.createElement('tr');
-    trTot.className='total-row';
-    trTot.innerHTML=`
-      <td style="color:#9CA3AF">Tot</td>
-      <td>${nA[T-1]}</td><td>${dA[T-1]}</td><td>${bA[T-1]}</td>
-      <td>${repA[T-1]}</td>
-      <td style="color:${neto>=meta?'#3B6D11':'#A32D2D'}">${neto}</td>
-      <td></td>`;
-    tbody.appendChild(trTot);
-
-    if(chart){
-      chart.data.datasets[0].data=xA;
-      chart.data.datasets[1].data=metaA;
-      chart.update();
-    } else {
-      chart=new Chart(document.getElementById('main-chart'),{
-        type:'line',
-        data:{
-          labels:horas.map(h=>'Hora '+h),
-          datasets:[
-            {
-              label:'Producción neta',
-              data:xA,
-              borderColor:'#378ADD',
-              backgroundColor:'rgba(55,138,221,.07)',
-              fill:true,
-              tension:.35,
-              pointRadius:5,
-              pointBackgroundColor:'#378ADD',
-              pointBorderColor:'#fff',
-              pointBorderWidth:2
-            },
-            {
-              label:'Meta acumulada',
-              data:metaA,
-              borderColor:'#E24B4A',
-              borderDash:[7,4],
-              borderWidth:2,
-              fill:false,
-              tension:0,
-              pointRadius:0
-            }
-          ]
-        },
-        options:{
-          responsive:true,
-          maintainAspectRatio:false,
-          plugins:{legend:{display:false}},
-          scales:{
-            x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11},color:'#9CA3AF'}},
-            y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11},color:'#9CA3AF',stepSize:100},beginAtZero:true}
-          }
+    <script type="text/babel">
+        if (typeof React === 'undefined' || typeof Recharts === 'undefined') {
+            document.getElementById('root').innerHTML =
+                '<div style="padding:48px;font-family:Inter,sans-serif;color:#b91c1c">' +
+                '<h2 style="margin-bottom:8px">No se pudieron cargar las librerías</h2>' +
+                '<p>Abre esta página con un servidor local o verifica tu conexión a internet.</p></div>';
+            throw new Error('Dependencias no cargadas');
         }
-      });
-    }
-  }
 
-  ['sl-rn','sl-rd','sl-rb','sl-rep'].forEach(id=>{
-    document.getElementById(id).addEventListener('input',update);
-  });
-  update();
-</script>
+        const { useState, useMemo } = React;
+        const {
+            BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+            ResponsiveContainer, AreaChart, Area, Line, ComposedChart,
+            ReferenceLine, Cell
+        } = Recharts;
+
+        const baseData = [
+            { id: 1, activity: "Aplicar Amtex", baseValue: 115 },
+            { id: 2, activity: "Armado Nido", baseValue: 405 },
+            { id: 3, activity: "Armado PVC", baseValue: 60 },
+            { id: 4, activity: "Armado y Empaque PVC con nid", baseValue: 29 },
+            { id: 5, activity: "Colocar cinta doble Faz", baseValue: 172 },
+            { id: 6, activity: "Colocar Nido", baseValue: 227 },
+            { id: 7, activity: "Colocar UPC", baseValue: 242 },
+            { id: 8, activity: "Desmontar Tallos", baseValue: 460 },
+            { id: 9, activity: "Empacar Tallo Bulk", baseValue: 100 },
+            { id: 10, activity: "Empacar Tallo/Flor Bulk", baseValue: 65 },
+            { id: 11, activity: "Empaque Display", baseValue: 17 },
+            { id: 12, activity: "Empaque PVC", baseValue: 49 },
+            { id: 13, activity: "Pegado", baseValue: 38 },
+            { id: 14, activity: "Pegar Cinta Razo a PVC", baseValue: 153 },
+            { id: 15, activity: "Reacondicionamiento", baseValue: 190 },
+            { id: 16, activity: "Tallos", baseValue: 49 },
+            { id: 17, activity: "Vinipelado", baseValue: 44 }
+        ];
+
+        const COLORS = { base: '#c4c9d4', projected: '#1d4ed8', gain: '#059669', grid: '#f0f1f3' };
+
+        const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+        const DIAS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+
+        function formatFechaGeneral(date = new Date()) {
+            const dia = DIAS[date.getDay()];
+            const num = date.getDate();
+            const mes = MESES[date.getMonth()];
+            const anio = date.getFullYear();
+            return `${dia.charAt(0).toUpperCase() + dia.slice(1)}, ${num} de ${mes} de ${anio}`;
+        }
+
+        function formatPeriodo(date = new Date()) {
+            const mes = MESES[date.getMonth()];
+            return `${mes.charAt(0).toUpperCase() + mes.slice(1)} ${date.getFullYear()}`;
+        }
+
+        const CustomTooltip = ({ active, payload, label }) => {
+            if (!active || !payload?.length) return null;
+            return (
+                <div style={{
+                    background: '#fff', border: '1px solid #e8eaed', borderRadius: 8,
+                    padding: '10px 14px', fontSize: 12, boxShadow: '0 4px 12px rgba(0,0,0,.08)'
+                }}>
+                    <div style={{ fontWeight: 600, marginBottom: 6, color: '#111827' }}>{label}</div>
+                    {payload.map((p, i) => (
+                        <div key={i} style={{ color: '#6b7280', marginTop: 3 }}>
+                            <span style={{ color: p.color, fontWeight: 600 }}>{p.name}: </span>
+                            {typeof p.value === 'number' ? p.value.toLocaleString() : p.value}
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        function Dashboard() {
+            const [improvementPercent, setImprovementPercent] = useState(10);
+            const [hoveredId, setHoveredId] = useState(null);
+
+            const data = useMemo(() =>
+                baseData.map(item => {
+                    const improvement = (item.baseValue * improvementPercent) / 100;
+                    return {
+                        ...item,
+                        shortName: item.activity.length > 18
+                            ? item.activity.slice(0, 16) + '…'
+                            : item.activity,
+                        currentValue: Math.round(item.baseValue + improvement),
+                        improvement: Math.round(improvement),
+                    };
+                }), [improvementPercent]);
+
+            const totalBase = useMemo(() => baseData.reduce((s, i) => s + i.baseValue, 0), []);
+            const totalCurrent = useMemo(() => data.reduce((s, i) => s + i.currentValue, 0), [data]);
+            const totalImprovement = totalCurrent - totalBase;
+            const efficiency = ((totalCurrent / totalBase) * 100).toFixed(1);
+
+            const topChart = useMemo(() =>
+                [...data].sort((a, b) => b.currentValue - a.currentValue).slice(0, 8),
+            [data]);
+
+            const gainChart = useMemo(() =>
+                [...data].sort((a, b) => b.improvement - a.improvement).slice(0, 8),
+            [data]);
+
+            const projectionCurve = useMemo(() => {
+                const steps = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
+                return steps.map(pct => {
+                    const projected = baseData.reduce((s, item) =>
+                        s + Math.round(item.baseValue + (item.baseValue * pct) / 100), 0);
+                    return { pct: `${pct}%`, total: projected, gain: projected - totalBase };
+                });
+            }, [totalBase]);
+
+            const sortedTable = useMemo(() =>
+                [...data].sort((a, b) => b.currentValue - a.currentValue),
+            [data]);
+
+            const maxCurrent = Math.max(...data.map(d => d.currentValue));
+            const fechaHoy = formatFechaGeneral();
+            const periodo = formatPeriodo();
+
+            return (
+                <div className="app">
+                    <header className="exec-banner">
+                        <div className="exec-banner-inner">
+                            <div>
+                                <div className="exec-meta">
+                                    <div className="date-badge">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                                        </svg>
+                                        {fechaHoy}
+                                    </div>
+                                    <span className="report-tag">Informe ejecutivo</span>
+                                </div>
+                                <h1>Tablero de Control — Producción</h1>
+                                <p className="exec-lead">
+                                    Resumen de rendimiento y proyección de mejoras operativas · Periodo {periodo}
+                                </p>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div className="shell">
+                        <section className="hero-summary">
+                            <div>
+                                <div className="hero-summary-label">Resultado proyectado</div>
+                                <div className="hero-summary-title">Meta de producción con mejora del {improvementPercent}%</div>
+                                <div className="hero-summary-desc">
+                                    De {totalBase.toLocaleString()} unidades base a {totalCurrent.toLocaleString()} unidades proyectadas
+                                </div>
+                            </div>
+                            <div className="hero-number-block">
+                                <div className="hero-number">{totalCurrent.toLocaleString()}</div>
+                                <div className="hero-number-label">+{totalImprovement.toLocaleString()} unidades adicionales</div>
+                            </div>
+                        </section>
+
+                        <header className="topbar">
+                            <div className="simulator">
+                                <div className="sim-label">Escenario de mejora — ajustar proyección</div>
+                                <div className="sim-row">
+                                    <div className="sim-value">{improvementPercent}%</div>
+                                    <input
+                                        type="range"
+                                        className="slider"
+                                        min="0"
+                                        max="50"
+                                        step="1"
+                                        value={improvementPercent}
+                                        onChange={e => setImprovementPercent(+e.target.value)}
+                                    />
+                                </div>
+                                <div className="sim-hint">
+                                    Impacto: +{totalImprovement.toLocaleString()} unidades sobre la base
+                                </div>
+                            </div>
+                        </header>
+
+                        <section className="kpi-row">
+                            <div className="kpi">
+                                <div className="kpi-label">Rendimiento base</div>
+                                <div className="kpi-value">{totalBase.toLocaleString()}</div>
+                                <div className="kpi-sub">Unidades del periodo</div>
+                            </div>
+                            <div className="kpi highlight">
+                                <div className="kpi-label">Meta proyectada</div>
+                                <div className="kpi-value accent">{totalCurrent.toLocaleString()}</div>
+                                <div className="kpi-delta">+{totalImprovement.toLocaleString()} un.</div>
+                            </div>
+                            <div className="kpi">
+                                <div className="kpi-label">Incremento</div>
+                                <div className="kpi-value gain">+{improvementPercent}%</div>
+                                <div className="kpi-sub">{Math.round(totalImprovement / data.length)} un. por actividad</div>
+                            </div>
+                            <div className="kpi">
+                                <div className="kpi-label">Eficiencia</div>
+                                <div className="kpi-value">{efficiency}%</div>
+                                <div className="kpi-sub">vs. línea base 100%</div>
+                            </div>
+                        </section>
+
+                        <section className="chart-grid">
+                            <div className="panel wide">
+                                <div className="panel-head">
+                                    <div>
+                                        <div className="panel-title">Base vs. Proyectado — Top actividades</div>
+                                        <div className="panel-sub">Comparativa interactiva por volumen</div>
+                                    </div>
+                                    <div className="legend-inline">
+                                        <span><span className="legend-dot" style={{ background: COLORS.base }}></span>Base</span>
+                                        <span><span className="legend-dot" style={{ background: COLORS.projected }}></span>Proyectado</span>
+                                    </div>
+                                </div>
+                                <div className="chart-wrap" style={{ height: 320 }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={topChart} barGap={4} barCategoryGap="18%"
+                                            margin={{ top: 4, right: 8, left: 0, bottom: 60 }}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
+                                            <XAxis
+                                                dataKey="shortName"
+                                                tick={{ fontSize: 10, fill: '#9ca3af' }}
+                                                angle={-35}
+                                                textAnchor="end"
+                                                interval={0}
+                                                height={70}
+                                                axisLine={false}
+                                                tickLine={false}
+                                            />
+                                            <YAxis
+                                                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                                                axisLine={false}
+                                                tickLine={false}
+                                                width={48}
+                                            />
+                                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(29,78,216,.04)' }} />
+                                            <Bar dataKey="baseValue" name="Base" fill={COLORS.base} radius={[3, 3, 0, 0]} />
+                                            <Bar dataKey="currentValue" name="Proyectado" fill={COLORS.projected} radius={[3, 3, 0, 0]} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+
+                            <div className="panel">
+                                <div className="panel-head">
+                                    <div>
+                                        <div className="panel-title">Curva de proyección</div>
+                                        <div className="panel-sub">Total acumulado según % de mejora</div>
+                                    </div>
+                                </div>
+                                <div className="chart-wrap" style={{ height: 260 }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={projectionCurve}
+                                            margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                                            <defs>
+                                                <linearGradient id="gradProjected" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="0%" stopColor={COLORS.projected} stopOpacity={0.18} />
+                                                    <stop offset="100%" stopColor={COLORS.projected} stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
+                                            <XAxis dataKey="pct" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                                            <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={44}
+                                                tickFormatter={v => `${(v / 1000).toFixed(1)}k`} />
+                                            <Tooltip content={<CustomTooltip />} />
+                                            <ReferenceLine
+                                                x={`${improvementPercent}%`}
+                                                stroke={COLORS.gain}
+                                                strokeDasharray="4 4"
+                                                label={{ value: 'Actual', position: 'top', fontSize: 10, fill: COLORS.gain }}
+                                            />
+                                            <Area type="monotone" dataKey="total" name="Total proyectado"
+                                                stroke={COLORS.projected} strokeWidth={2} fill="url(#gradProjected)" />
+                                            <Line type="monotone" dataKey="gain" name="Ganancia"
+                                                stroke={COLORS.gain} strokeWidth={1.5} dot={false} strokeDasharray="4 2" />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+
+                            <div className="panel">
+                                <div className="panel-head">
+                                    <div>
+                                        <div className="panel-title">Ganancia por actividad</div>
+                                        <div className="panel-sub">Unidades adicionales al {improvementPercent}%</div>
+                                    </div>
+                                </div>
+                                <div className="chart-wrap" style={{ height: 260 }}>
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={gainChart} layout="vertical"
+                                            margin={{ top: 4, right: 16, left: 4, bottom: 4 }}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} horizontal={false} />
+                                            <XAxis type="number" tick={{ fontSize: 10, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                                            <YAxis type="category" dataKey="shortName"
+                                                tick={{ fontSize: 10, fill: '#9ca3af' }} width={100}
+                                                axisLine={false} tickLine={false} />
+                                            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(5,150,105,.06)' }} />
+                                            <Bar dataKey="improvement" name="Ganancia" radius={[0, 3, 3, 0]}
+                                                onMouseEnter={(_, idx) => setHoveredId(gainChart[idx]?.id)}
+                                                onMouseLeave={() => setHoveredId(null)}>
+                                                {gainChart.map((entry, i) => (
+                                                    <Cell key={i}
+                                                        fill={hoveredId === entry.id ? COLORS.gain : COLORS.projected}
+                                                        fillOpacity={hoveredId && hoveredId !== entry.id ? 0.35 : 1}
+                                                    />
+                                                ))}
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section className="panel table-panel">
+                            <div className="panel-head">
+                                <div>
+                                    <div className="panel-title">Detalle por actividad</div>
+                                    <div className="panel-sub">{data.length} actividades — ordenadas por volumen proyectado</div>
+                                </div>
+                            </div>
+                            <div className="table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Actividad</th>
+                                            <th>Base</th>
+                                            <th>Proyectado</th>
+                                            <th>Ganancia</th>
+                                            <th>Distribución</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {sortedTable.map(item => (
+                                            <tr key={item.id}
+                                                onMouseEnter={() => setHoveredId(item.id)}
+                                                onMouseLeave={() => setHoveredId(null)}
+                                                style={{ background: hoveredId === item.id ? '#f9fafb' : undefined }}>
+                                                <td className="td-name">{item.activity}</td>
+                                                <td className="td-num">{item.baseValue.toLocaleString()}</td>
+                                                <td className="td-num td-projected">{item.currentValue.toLocaleString()}</td>
+                                                <td className="td-num td-gain">+{item.improvement.toLocaleString()}</td>
+                                                <td>
+                                                    <div className="mini-bar">
+                                                        <div className="mini-bar-track">
+                                                            <div className="mini-bar-fill"
+                                                                style={{ width: `${(item.currentValue / maxCurrent) * 100}%` }} />
+                                                        </div>
+                                                        <span className="mini-bar-pct">
+                                                            {((item.currentValue / maxCurrent) * 100).toFixed(0)}%
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            );
+        }
+
+        const rootEl = document.getElementById('root');
+        if (ReactDOM.createRoot) {
+            ReactDOM.createRoot(rootEl).render(<Dashboard />);
+        } else {
+            ReactDOM.render(<Dashboard />, rootEl);
+        }
+    </script>
 </body>
 </html>
